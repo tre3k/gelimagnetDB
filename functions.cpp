@@ -382,7 +382,7 @@ void paintCross(iQCustomPlot *plot,sOptions options, sData *data, double x, doub
         break;
     }
 
-    qDebug () << Mx2;
+    //qDebug () << Mx2;
 
     x1 = My2*tan(2*M_PI*phi/360);
     x2 = Mx2-x1;
@@ -400,4 +400,80 @@ void paintCross(iQCustomPlot *plot,sOptions options, sData *data, double x, doub
     line2->start->setCoords(x-Mx2,y1+y);
     line2->end->setCoords(Mx2+x,y2+y-My2);
 
+}
+
+int findIndexInList(QListWidget *listWidget){
+    int index = -1;
+    for(int i=0;i<listWidget->count();i++){
+        if(listWidget->item(i)->isSelected()){
+            index=i;
+            break;
+        }
+    }
+    return index;
+}
+
+void LinearAverage(QVector<double> *vX, QVector<double> *vY, QVector<double> *vErr,
+                   sData *data, double input_x0, double input_y0,
+                   double input_witdh, double input_offset, int direction){
+
+    int x0,y0,width,offset,k;
+    int maxRangeX,maxRangeY;
+
+    x0 = doubleToInt(input_x0*pow(2,data->step_interpolate));
+    y0 = doubleToInt(input_y0*pow(2,data->step_interpolate));
+    width = doubleToInt(input_witdh*pow(2,data->step_interpolate));
+    offset = doubleToInt(input_offset*pow(2,data->step_interpolate));
+
+    qDebug () << "x0: " << x0;
+    qDebug () << "y0: " << y0;
+    qDebug () << "width: " << width;
+
+    maxRangeX = data->n_x;
+    maxRangeY = data->n_y;
+
+    vX->clear();
+    vY->clear();
+    vErr->clear();
+
+    double S=0;
+    double err;
+
+    switch(direction){
+    case LinearAverageDirection_RIGHT:
+        k=0;
+        for(int i=x0+offset;i<maxRangeX;i++){
+            S=0;
+            if(i<0 || i>=maxRangeX) break;
+            for(int j=y0;j<y0+width;j++){
+                if(j-1<0 || j>=maxRangeY) break;
+                S += data->data[i][j] + data->data[i][j-1];
+            }
+            err = sqrt(S);
+            vX->append(k/pow(2,data->step_interpolate));
+            vY->append(S);
+            vErr->append(err);
+            k++;
+        }
+        break;
+    case LinearAverageDirection_LEFT:
+        k=0;
+        for(int i=x0-offset;i>=0;i--){
+            S=0;
+            if(i<0 || i>=maxRangeX) break;
+            for(int j=y0;j<y0+width;j++){
+                if(j-1<0 || j>=maxRangeY) break;
+                S += data->data[i][j] + data->data[i][j-1];
+            }
+            err = sqrt(S);
+            //vX->append(i/pow(2,data->step_interpolate));
+            vX->append(k/pow(2,data->step_interpolate));
+            vY->append(S);
+            vErr->append(err);
+            k++;
+        }
+        break;
+    }
+
+    return;
 }

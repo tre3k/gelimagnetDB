@@ -370,13 +370,15 @@ void MainWindow::on_pushButton_Ks_clr_clicked()
 
 void MainWindow::on_pushButtonKsInterpolate_clicked()
 {
-    int index=-1;
+    int index=findIndexInList(ui->listWidget_Ks);
+    /*
     for(int i=0;i<ui->listWidget_Ks->count();i++){
         if(ui->listWidget_Ks->item(i)->isSelected()){
             index=i;
             break;
         }
     }
+    */
     if(index<0) return;
     interpolate(db,mainOptions,&vDataKsDB[index],&vDataKs[index],ui->spinBoxKsInterpolate->value());
     plotData(plotKs2D,&vDataKs[index],mainOptions);
@@ -384,12 +386,14 @@ void MainWindow::on_pushButtonKsInterpolate_clicked()
 
 void MainWindow::slot_KsCenterChanged(double value){
     int index = -1;
+
     for(int i=0;i<ui->listWidget_Ks->count();i++){
         if(ui->listWidget_Ks->item(i)->isSelected()){
             index=i;
             break;
         }
     }
+
     if(index<0) return;
     plotKs2D->plot2D->clearItems();
     paintCross(plotKs2D->plot2D,mainOptions,&vDataKs[index],
@@ -402,6 +406,7 @@ void MainWindow::slot_KsCenterChanged(double value){
 
 void MainWindow::on_pushButtonKsCenterOk_clicked()
 {
+
     int index = -1;
     for(int i=0;i<ui->listWidget_Ks->count();i++){
         if(ui->listWidget_Ks->item(i)->isSelected()){
@@ -409,14 +414,42 @@ void MainWindow::on_pushButtonKsCenterOk_clicked()
             break;
         }
     }
+
     if(index<0) return;
     vDataKs[index].centerAngle = ui->spinBoxKsAngle->value();
     vDataKs[index].centerX = ui->spinBoxKsCenterX->value();
     vDataKs[index].centerY = ui->spinBoxKsCenterY->value();
 }
 
+void MainWindow::on_pushButtonKsAverage_clicked()
+{
+    int indexList=findIndexInList(ui->listWidget_Ks);
+    if(indexList<0) return;
+
+    LinearAverage(&vKsAverageXxR,&vKsAverageXyR,&vKsAverageXerrR,&vDataKs[indexList],
+                  ui->spinBoxKsCenterX->value(),
+                  ui->spinBoxKsCenterY->value(),
+                  ui->spinBoxKsAverageWidth->value(),
+                  ui->spinBoxKsAverage_x_offset->value(),
+                  LinearAverageDirection_RIGHT);
+    plotKsX->clearGraphs();
+
+    LinearAverage(&vKsAverageXxL,&vKsAverageXyL,&vKsAverageXerrL,&vDataKs[indexList],
+                  ui->spinBoxKsCenterX->value(),
+                  ui->spinBoxKsCenterY->value(),
+                  ui->spinBoxKsAverageWidth->value(),
+                  ui->spinBoxKsAverage_x_offset->value(),
+                  LinearAverageDirection_LEFT);
+
+    plotKsX->addCurve(&vKsAverageXxR,&vKsAverageXyR,true,"red","toRight");
+    plotKsX->addCurve(&vKsAverageXxL,&vKsAverageXyL,true,"green","toLeft");
+
+}
+
+
 
 /* End Find Ks */
+
 
 
 

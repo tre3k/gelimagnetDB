@@ -43,8 +43,16 @@ public:
 
     iCasePlot2D *plotKs2D;
     iQCustomPlot *plotKsX;
+    QVector<double> vKsAverageXxR;
+    QVector<double> vKsAverageXyR;
+    QVector<double> vKsAverageXerrR;
+    QVector<double> vKsAverageXxL;
+    QVector<double> vKsAverageXyL;
+    QVector<double> vKsAverageXerrL;
     iQCustomPlot *plotKsY;
-
+    QVector<double> vKsAverageYx;
+    QVector<double> vKsAverageYy;
+    QVector<double> vKsAverageYerr;
 
 
     QProgressBar *globalProgressBar;
@@ -102,6 +110,8 @@ private slots:
     void on_pushButtonKsInterpolate_clicked();
 
     void on_pushButtonKsCenterOk_clicked();
+
+    void on_pushButtonKsAverage_clicked();
 
 signals:
     void signal_sendOptions(sOptions);

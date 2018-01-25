@@ -10,6 +10,13 @@
 #include "iqcustomplot.h"
 #include "config.h"
 
+enum{
+  LinearAverageDirection_UP,
+  LinearAverageDirection_DOWN,
+  LinearAverageDirection_RIGHT,
+  LinearAverageDirection_LEFT
+};
+
 void readDataDB(QSqlDatabase, sDataDB ,sData *, sOptions);
 void plotData(iCasePlot2D *,sData *, sOptions);
 
@@ -24,5 +31,8 @@ void interpolate(QSqlDatabase, sOptions ,sDataDB *,sData *,int);
 void copydata(double **,double **,int,int);
 double pix2Impulse(sData *,double);
 void paintCross(iQCustomPlot *,sOptions, sData *, double , double , double);
+void LinearAverage(QVector<double> *,QVector<double> *,QVector<double> *,sData *,
+                   double,double,double,double,int);
+int findIndexInList(QListWidget *);
 
 #endif // FUNCTIONS_H
