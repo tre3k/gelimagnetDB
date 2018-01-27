@@ -50,9 +50,12 @@ public:
     QVector<double> vKsAverageXyL;
     QVector<double> vKsAverageXerrL;
     iQCustomPlot *plotKsY;
-    QVector<double> vKsAverageYx;
-    QVector<double> vKsAverageYy;
-    QVector<double> vKsAverageYerr;
+    QVector<double> vKsAverageYxL;
+    QVector<double> vKsAverageYyL;
+    QVector<double> vKsAverageYerrL;
+    QVector<double> vKsAverageYxR;
+    QVector<double> vKsAverageYyR;
+    QVector<double> vKsAverageYerrR;
 
 
     QProgressBar *globalProgressBar;
@@ -112,6 +115,10 @@ private slots:
     void on_pushButtonKsCenterOk_clicked();
 
     void on_pushButtonKsAverage_clicked();
+
+    void on_pushButtonKsSetKs_clicked();
+
+    void on_pushButtonFindCenter_clicked();
 
 signals:
     void signal_sendOptions(sOptions);

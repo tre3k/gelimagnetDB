@@ -464,6 +464,9 @@
          <height>24</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>5</number>
+       </property>
        <property name="maximum">
         <double>99999.000000000000000</double>
        </property>
@@ -476,6 +479,9 @@
          <width>101</width>
          <height>24</height>
         </rect>
+       </property>
+       <property name="decimals">
+        <number>5</number>
        </property>
        <property name="maximum">
         <double>99999.000000000000000</double>
@@ -549,6 +555,19 @@
         <string>ok</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="pushButtonFindCenter">
+       <property name="geometry">
+        <rect>
+         <x>101</x>
+         <y>98</y>
+         <width>81</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>find center</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QPushButton" name="pushButtonKsOk">
       <property name="geometry">
@@ -584,6 +603,9 @@
          <height>24</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>5</number>
+       </property>
       </widget>
       <widget class="QDoubleSpinBox" name="spinBoxKs1Y">
        <property name="geometry">
@@ -593,6 +615,9 @@
          <width>81</width>
          <height>24</height>
         </rect>
+       </property>
+       <property name="decimals">
+        <number>5</number>
        </property>
       </widget>
       <widget class="QLabel" name="label_10">
@@ -630,6 +655,9 @@
          <height>24</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>5</number>
+       </property>
       </widget>
       <widget class="QDoubleSpinBox" name="spinBoxKs2Y">
        <property name="geometry">
@@ -640,12 +668,15 @@
          <height>24</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>5</number>
+       </property>
       </widget>
       <widget class="QLabel" name="label_12">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>106</y>
+         <y>100</y>
          <width>41</width>
          <height>16</height>
         </rect>
@@ -654,14 +685,56 @@
         <string>value:</string>
        </property>
       </widget>
-      <widget class="QDoubleSpinBox" name="spinBoxKsValue">
+      <widget class="QPushButton" name="pushButtonKsAverage">
        <property name="geometry">
         <rect>
-         <x>60</x>
-         <y>101</y>
-         <width>121</width>
-         <height>24</height>
+         <x>80</x>
+         <y>140</y>
+         <width>61</width>
+         <height>23</height>
         </rect>
+       </property>
+       <property name="text">
+        <string>find Ks</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButtonKsSetKs">
+       <property name="geometry">
+        <rect>
+         <x>150</x>
+         <y>140</y>
+         <width>31</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>ok</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelKsValue">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>100</y>
+         <width>131</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelKsValueNm">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>117</y>
+         <width>131</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>
@@ -677,19 +750,6 @@
       <property name="title">
        <string>Average</string>
       </property>
-      <widget class="QPushButton" name="pushButtonKsAverage">
-       <property name="geometry">
-        <rect>
-         <x>166</x>
-         <y>145</y>
-         <width>61</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>average</string>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_13">
        <property name="geometry">
         <rect>
@@ -732,7 +792,7 @@
         <double>999999.000000000000000</double>
        </property>
       </widget>
-      <widget class="QDoubleSpinBox" name="spinBoxKsAverageWidth">
+      <widget class="QDoubleSpinBox" name="spinBoxKsAverageWidthX">
        <property name="geometry">
         <rect>
          <x>152</x>
@@ -761,7 +821,39 @@
         </rect>
        </property>
        <property name="text">
-        <string>width:</string>
+        <string>width x:</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="spinBoxKsAverageWidthY">
+       <property name="geometry">
+        <rect>
+         <x>151</x>
+         <y>78</y>
+         <width>71</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="minimum">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>999999.000000000000000</double>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_16">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>80</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>width y:</string>
        </property>
       </widget>
      </widget>

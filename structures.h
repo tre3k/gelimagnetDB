@@ -28,6 +28,8 @@ struct sData{
 
     int step_interpolate;
     double centerX,centerY,centerAngle;
+    double KsX1,KsX2,KsY1,KsY2;
+    double KsValue;
 
     double temp_K;
     double fild_T;

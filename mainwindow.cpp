@@ -315,6 +315,16 @@ void MainWindow::slot_KsListClick(int index){
     ui->spinBoxKsCenterY->setValue(vDataKs.at(index).centerY);
     ui->spinBoxKsAngle->setValue(vDataKs.at(index).centerAngle);
 
+    ui->spinBoxKs1X->setValue(vDataKs.at(index).KsX1);
+    ui->spinBoxKs2X->setValue(vDataKs.at(index).KsX2);
+    ui->spinBoxKs1Y->setValue(vDataKs.at(index).KsY1);
+    ui->spinBoxKs2Y->setValue(vDataKs.at(index).KsY2);
+
+    double KsPix = vDataKs.at(index).KsValue;
+
+    ui->labelKsValue->setText(QString::number(KsPix)+" pix");
+    ui->labelKsValueNm->setText(QString::number(10.0*pix2Impulse(&vDataKs[index],KsPix))+" 1/nm");
+
     plotKs2D->plot2D->clearItems();
     paintCross(plotKs2D->plot2D,mainOptions,&vDataKs[index],
                ui->spinBoxKsCenterX->value(),
@@ -423,35 +433,180 @@ void MainWindow::on_pushButtonKsCenterOk_clicked()
 
 void MainWindow::on_pushButtonKsAverage_clicked()
 {
-    int indexList=findIndexInList(ui->listWidget_Ks);
-    if(indexList<0) return;
+    int index=findIndexInList(ui->listWidget_Ks);
+    if(index<0) return;
 
-    LinearAverage(&vKsAverageXxR,&vKsAverageXyR,&vKsAverageXerrR,&vDataKs[indexList],
+    sFindMaxHM maxHMxR;
+    sFindMaxHM maxHMxL;
+    sFindMaxHM maxHMyR;
+    sFindMaxHM maxHMyL;
+
+    LinearAverage(&vKsAverageXxR,&vKsAverageXyR,&vKsAverageXerrR,&vDataKs[index],
                   ui->spinBoxKsCenterX->value(),
                   ui->spinBoxKsCenterY->value(),
-                  ui->spinBoxKsAverageWidth->value(),
+                  ui->spinBoxKsAverageWidthX->value(),
                   ui->spinBoxKsAverage_x_offset->value(),
                   LinearAverageDirection_RIGHT);
-    plotKsX->clearGraphs();
 
-    LinearAverage(&vKsAverageXxL,&vKsAverageXyL,&vKsAverageXerrL,&vDataKs[indexList],
+
+    LinearAverage(&vKsAverageXxL,&vKsAverageXyL,&vKsAverageXerrL,&vDataKs[index],
                   ui->spinBoxKsCenterX->value(),
                   ui->spinBoxKsCenterY->value(),
-                  ui->spinBoxKsAverageWidth->value(),
+                  ui->spinBoxKsAverageWidthX->value(),
                   ui->spinBoxKsAverage_x_offset->value(),
                   LinearAverageDirection_LEFT);
+
+    maxHMxR = findMaxHM(&vKsAverageXxR,&vKsAverageXyR);
+    maxHMxL = findMaxHM(&vKsAverageXxL,&vKsAverageXyL);
+
+    plotKsX->clearItems();plotKsX->clearGraphs();
+    QCPItemLine *LineXR = new QCPItemLine(plotKsX);
+    QCPItemLine *LineXL = new QCPItemLine(plotKsX);
+    //QCPItemText *textXR = new QCPItemText(plotKsX);
+    //QCPItemText *textXL = new QCPItemText(plotKsX);
+
+    QCPItemLine *LineHMxR_R = new QCPItemLine(plotKsX);
+    QCPItemLine *LineHMxR_L = new QCPItemLine(plotKsX);
+    QCPItemLine *LineHMxL_R = new QCPItemLine(plotKsX);
+    QCPItemLine *LineHMxL_L = new QCPItemLine(plotKsX);
+
+    LineHMxR_R->start->setCoords(maxHMxR.xMaxHMR,0);
+    LineHMxR_R->end->setCoords(maxHMxR.xMaxHMR,maxHMxR.yMax);
+    LineHMxR_L->start->setCoords(maxHMxR.xMaxHML,0);
+    LineHMxR_L->end->setCoords(maxHMxR.xMaxHML,maxHMxR.yMax);
+    LineHMxR_R->setPen(QPen(QColor("red"),1,Qt::DashLine,Qt::SquareCap,Qt::BevelJoin));
+    LineHMxR_L->setPen(QPen(QColor("red"),1,Qt::DashLine,Qt::SquareCap,Qt::BevelJoin));
+    LineXR->start->setCoords(maxHMxR.xMax,0);
+    LineXR->end->setCoords(maxHMxR.xMax,maxHMxR.yMax);
+    LineXR->setPen(QPen(Qt::red));
+
+    LineHMxL_R->start->setCoords(maxHMxL.xMaxHMR,0);
+    LineHMxL_R->end->setCoords(maxHMxL.xMaxHMR,maxHMxL.yMax);
+    LineHMxL_L->start->setCoords(maxHMxL.xMaxHML,0);
+    LineHMxL_L->end->setCoords(maxHMxL.xMaxHML,maxHMxL.yMax);
+    LineHMxL_R->setPen(QPen(QColor("green"),1,Qt::DashLine,Qt::SquareCap,Qt::BevelJoin));
+    LineHMxL_L->setPen(QPen(QColor("green"),1,Qt::DashLine,Qt::SquareCap,Qt::BevelJoin));
+    LineXL->start->setCoords(maxHMxL.xMax,0);
+    LineXL->end->setCoords(maxHMxL.xMax,maxHMxL.yMax);
+    LineXL->setPen(QPen(Qt::green));
 
     plotKsX->addCurve(&vKsAverageXxR,&vKsAverageXyR,true,"red","toRight");
     plotKsX->addCurve(&vKsAverageXxL,&vKsAverageXyL,true,"green","toLeft");
 
+    double KsX1,KsX2,KsY1,KsY2;
+    KsX2 = ui->spinBoxKsCenterX->value()+maxHMxR.xMaxHML+(maxHMxR.xMaxHMR-maxHMxR.xMaxHML)/2;
+    KsX1 = ui->spinBoxKsCenterX->value()-maxHMxL.xMaxHML-(maxHMxL.xMaxHMR-maxHMxL.xMaxHML)/2;
+    ui->spinBoxKs1X->setValue(KsX1);
+    ui->spinBoxKs2X->setValue(KsX2);
+
+
+    LinearAverage(&vKsAverageYxL,&vKsAverageYyL,&vKsAverageYerrL,&vDataKs[index],
+                  KsX1,
+                  0.0,
+                  ui->spinBoxKsAverageWidthY->value(),
+                  0.0,
+                  LinearAverageDirection_UP);
+    LinearAverage(&vKsAverageYxR,&vKsAverageYyR,&vKsAverageYerrR,&vDataKs[index],
+                  KsX2,
+                  0.0,
+                  ui->spinBoxKsAverageWidthY->value(),
+                  0.0,
+                  LinearAverageDirection_UP);
+
+    maxHMyR = findMaxHM(&vKsAverageYxR,&vKsAverageYyR);
+    maxHMyL = findMaxHM(&vKsAverageYxL,&vKsAverageYyL);
+    plotKsY->clearItems();plotKsY->clearGraphs();
+
+    QCPItemLine *LineYR = new QCPItemLine(plotKsY);
+    QCPItemLine *LineYL = new QCPItemLine(plotKsY);
+    //QCPItemText *textXR = new QCPItemText(plotKsX);
+    //QCPItemText *textXL = new QCPItemText(plotKsX);
+
+    QCPItemLine *LineHMyR_R = new QCPItemLine(plotKsY);
+    QCPItemLine *LineHMyR_L = new QCPItemLine(plotKsY);
+    QCPItemLine *LineHMyL_R = new QCPItemLine(plotKsY);
+    QCPItemLine *LineHMyL_L = new QCPItemLine(plotKsY);
+
+    LineHMyR_R->start->setCoords(maxHMyR.xMaxHMR,0);
+    LineHMyR_R->end->setCoords(maxHMyR.xMaxHMR,maxHMyR.yMax);
+    LineHMyR_L->start->setCoords(maxHMyR.xMaxHML,0);
+    LineHMyR_L->end->setCoords(maxHMyR.xMaxHML,maxHMyR.yMax);
+    LineHMyR_R->setPen(QPen(QColor("red"),1,Qt::DashLine,Qt::SquareCap,Qt::BevelJoin));
+    LineHMyR_L->setPen(QPen(QColor("red"),1,Qt::DashLine,Qt::SquareCap,Qt::BevelJoin));
+    LineYR->start->setCoords(maxHMyR.xMax,0);
+    LineYR->end->setCoords(maxHMyR.xMax,maxHMyR.yMax);
+    LineYR->setPen(QPen(Qt::red));
+
+    LineHMyL_R->start->setCoords(maxHMyL.xMaxHMR,0);
+    LineHMyL_R->end->setCoords(maxHMyL.xMaxHMR,maxHMyL.yMax);
+    LineHMyL_L->start->setCoords(maxHMyL.xMaxHML,0);
+    LineHMyL_L->end->setCoords(maxHMyL.xMaxHML,maxHMyL.yMax);
+    LineHMyL_R->setPen(QPen(QColor("green"),1,Qt::DashLine,Qt::SquareCap,Qt::BevelJoin));
+    LineHMyL_L->setPen(QPen(QColor("green"),1,Qt::DashLine,Qt::SquareCap,Qt::BevelJoin));
+    LineYL->start->setCoords(maxHMyL.xMax,0);
+    LineYL->end->setCoords(maxHMyL.xMax,maxHMyL.yMax);
+    LineYL->setPen(QPen(Qt::green));
+
+    plotKsY->addCurve(&vKsAverageYxL,&vKsAverageYyL,true,"green","toLeft");
+    plotKsY->addCurve(&vKsAverageYxR,&vKsAverageYyR,true,"red","toRight");
+
+    KsY1 = maxHMyL.xMaxHML + (maxHMyL.xMaxHMR-maxHMyL.xMaxHML)/2.0;
+    KsY2 = maxHMyR.xMaxHML + (maxHMyR.xMaxHMR-maxHMyR.xMaxHML)/2.0;
+
+    ui->spinBoxKs1Y->setValue(KsY1);
+    ui->spinBoxKs2Y->setValue(KsY2);
+
+    double KsPix =sqrt((KsX1-KsY1)*(KsX1-KsY1) + (KsX2-KsY2)*(KsX2-KsY2))/2.0;
+
+    ui->labelKsValue->setText(QString::number(KsPix)+" pix");
+    ui->labelKsValueNm->setText(QString::number(10.0*pix2Impulse(&vDataKs[index],KsPix))+" 1/nm");
+
+    //plotKs2D->p
+    paintSmallCross(plotKs2D->plot2D,KsX1,KsY1);
+    paintSmallCross(plotKs2D->plot2D,KsX2,KsY2);
+    plotKs2D->plot2D->update();
+    return;
 }
 
+void MainWindow::on_pushButtonKsSetKs_clicked()
+{
+    int index=findIndexInList(ui->listWidget_Ks);
+    vDataKs[index].KsX1 = ui->spinBoxKs1X->value();
+    vDataKs[index].KsX2 = ui->spinBoxKs2X->value();
+    vDataKs[index].KsY1 = ui->spinBoxKs1Y->value();
+    vDataKs[index].KsY2 = ui->spinBoxKs2Y->value();
+    vDataKs[index].KsValue = sqrt(
+                (vDataKs[index].KsX1-vDataKs[index].KsY1)
+               *(vDataKs[index].KsX1-vDataKs[index].KsY1) +
+                (vDataKs[index].KsX2-vDataKs[index].KsY2)
+               *(vDataKs[index].KsX2-vDataKs[index].KsY2))/2.0;
 
+}
+
+void MainWindow::on_pushButtonFindCenter_clicked()
+{
+    double KsX1,KsX2,KsY1,KsY2;
+
+    KsX1 = ui->spinBoxKs1X->value();
+    KsX2 = ui->spinBoxKs2X->value();
+    KsY1 = ui->spinBoxKs1Y->value();
+    KsY2 = ui->spinBoxKs2Y->value();
+
+    double centerX,centerY;
+    if(KsX1>KsX2){
+        centerX = KsX2 + (KsX1-KsX2)/2.0;
+    }else{
+        centerX = KsX1 + (KsX2-KsX1)/2.0;
+    }
+    if(KsY1>KsY2){
+        centerY = KsY2 + (KsY1-KsY2)/2.0;
+    }else{
+        centerY = KsY1 + (KsY2-KsY1)/2.0;
+    }
+    ui->spinBoxKsCenterX->setValue(centerX);
+    ui->spinBoxKsCenterY->setValue(centerY);
+}
 
 /* End Find Ks */
-
-
-
-
 
 

@@ -341,8 +341,21 @@ void copydata(double **data_in,double **data_out,int x,int y){
 }
 
 double pix2Impulse(sData *data, double value){
+    /* in 1/A */
     return value*atan(1.0e-3*data->resolution/data->distance_SD)*2*M_PI/data->wavelenght;
     //return value*atan(1.0e-3*data->resolution/data->distance_SD)*2*M_PI/data->wavelenght/pow(2,data->step_interpolate);
+}
+
+
+void paintSmallCross(iQCustomPlot *plot, double x, double y){
+     QCPItemLine *line1 = new QCPItemLine(plot);
+     line1->setPen(QPen(QColor("green"),1,Qt::SolidLine,Qt::SquareCap,Qt::BevelJoin));
+     line1->start->setCoords(x,y+2);
+     line1->end->setCoords(x,y-2);
+     QCPItemLine *line2 = new QCPItemLine(plot);
+     line2->setPen(QPen(QColor("green"),1,Qt::SolidLine,Qt::SquareCap,Qt::BevelJoin));
+     line2->start->setCoords(x+2,y);
+     line2->end->setCoords(x-2,y);
 }
 
 void paintCross(iQCustomPlot *plot,sOptions options, sData *data, double x, double y, double phi){
@@ -417,7 +430,7 @@ void LinearAverage(QVector<double> *vX, QVector<double> *vY, QVector<double> *vE
                    sData *data, double input_x0, double input_y0,
                    double input_witdh, double input_offset, int direction){
 
-    int x0,y0,width,offset,k;
+    int x0,y0,width,offset,k,l;
     int maxRangeX,maxRangeY;
 
     x0 = doubleToInt(input_x0*pow(2,data->step_interpolate));
@@ -441,34 +454,56 @@ void LinearAverage(QVector<double> *vX, QVector<double> *vY, QVector<double> *vE
 
     switch(direction){
     case LinearAverageDirection_RIGHT:
-        k=0;
+        k=offset;
         for(int i=x0+offset;i<maxRangeX;i++){
-            S=0;
+            S=0;l=0;
             if(i<0 || i>=maxRangeX) break;
             for(int j=y0;j<y0+width;j++){
-                if(j-1<0 || j>=maxRangeY) break;
-                S += data->data[i][j] + data->data[i][j-1];
+                if(y0-l<0 || j>=maxRangeY) break;
+                //S += data->data[i][j] + data->data[i][j-1];
+                S += data->data[i][j] + data->data[i][y0-l];
+                l++;
             }
             err = sqrt(S);
             vX->append(k/pow(2,data->step_interpolate));
-            vY->append(S);
+            vY->append(S/2/l);
             vErr->append(err);
             k++;
         }
         break;
+
     case LinearAverageDirection_LEFT:
-        k=0;
+        k=offset;
         for(int i=x0-offset;i>=0;i--){
-            S=0;
+            S=0;l=0;
             if(i<0 || i>=maxRangeX) break;
             for(int j=y0;j<y0+width;j++){
-                if(j-1<0 || j>=maxRangeY) break;
-                S += data->data[i][j] + data->data[i][j-1];
+                if(y0-l<0 || j>=maxRangeY) break;
+                S += data->data[i][j] + data->data[i][y0-l];
+                l++;
             }
             err = sqrt(S);
             //vX->append(i/pow(2,data->step_interpolate));
             vX->append(k/pow(2,data->step_interpolate));
-            vY->append(S);
+            vY->append(S/2/l);
+            vErr->append(err);
+            k++;
+        }
+        break;
+
+    case LinearAverageDirection_UP:
+        k=offset;
+        for(int i=y0+offset;i<maxRangeY;i++){
+            S=0; l=0;
+            if(i<0 || i>=maxRangeY) break;
+            for(int j=x0;j<x0+width;j++){
+                if(x0-l<0 || j>=maxRangeX) break;
+                S += data->data[j][i]+data->data[x0-l][i];
+                l++;
+            }
+            err = sqrt(S);
+            vX->append(k/pow(2,data->step_interpolate));
+            vY->append(S/2/l);
             vErr->append(err);
             k++;
         }
@@ -476,4 +511,37 @@ void LinearAverage(QVector<double> *vX, QVector<double> *vY, QVector<double> *vE
     }
 
     return;
+}
+
+sFindMaxHM findMaxHM(QVector<double> *vX, QVector<double> *vY){
+    sFindMaxHM ret;
+    int tmpIcenter;
+    double HM;
+    ret.yMax = 0.0;
+    ret.background = vY->at(0);
+    for(int i=0;i<vY->count();i++){
+        if(ret.yMax<vY->at(i)){
+            ret.yMax = vY->at(i);
+            ret.xMax = vX->at(i);
+            tmpIcenter = i;
+        }
+        if(ret.background > vY->at(i)) ret.background = vY->at(i);
+    }
+
+    HM = (ret.yMax-ret.background)/2.0;
+
+    for(int i=tmpIcenter;i>0;i--){
+        if((vY->at(i) >= HM)&&(vY->at(i-1) <= HM)){
+            ret.xMaxHML = vX->at(i);
+            break;
+        }
+    }
+    for(int i=tmpIcenter;i<vY->count()-1;i++){
+        if((vY->at(i) >= HM)&&(vY->at(i+1) <= HM)){
+            ret.xMaxHMR = vX->at(i);
+            break;
+        }
+    }
+
+    return ret;
 }
